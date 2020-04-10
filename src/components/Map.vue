@@ -40,6 +40,7 @@ export default {
         series.mapPolygons.template.fill = color('#aaaaaa');
         series.mapPolygons.template.propertyFields.fill = 'fill';
         series.exclude = ['AQ'];
+        // series.slices.template.getFillFromObject = false;
 
         // const hover = series.mapPolygons.template.states.create('hover');
 
@@ -56,5 +57,9 @@ export default {
     width: 100%;
     height: 100%;
 }
+
+/* .amtooltip {
+    font-size: 30px;
+} */
 
 </style>
