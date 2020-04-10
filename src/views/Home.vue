@@ -1,37 +1,42 @@
 <template>
-    <Loading v-if="loading" />
-    <div v-else class="container">
+    <div class="container">
         <div class="options">
             <Help />
             <DataToggle :data-type="dataType" @click.native="changeDataType()" />
         </div>
-        <Map class="map" :countries="countries" />
-        <!-- <div>
-            <ejs-slider class="range" :value="10" min="1" max="20" v-model="dateRange" type="Range"></ejs-slider>
-        </div> -->
+
+        <Loading v-if="loading" />
+        <Map v-else class="map" :countries="countries" />
+
+        <!-- <DatePicker v-model="dateRange" /> -->
     </div>
 </template>
 
 <script>
-import Vue from 'vue';
 import * as interpolate from 'color-interpolate';
-import { SliderPlugin } from '@syncfusion/ej2-vue-inputs';
 import { loadData } from '@/lib/data';
 import Help from '@/components/Help';
 import DataToggle from '@/components/DataToggle';
 import Map from '@/components/Map';
 import Loading from '@/components/Loading';
+import DatePicker from '@/components/DatePicker';
 
 // TODO
-// - Fade map etc in
-// - Date range slider to pick dates for calculation
-// - Toggle between confirmed cases and deaths
-// - Download data sets and save to local storage for quicker subsequent loads on same day
+
+// High:
 // - Confirm calculation is correct / useful
 // - Get data working for grey countries
+// - Date range slider to pick dates for calculation
 // - Finalise colour scheme!
+// - Improve map tooltips
 
-Vue.use(SliderPlugin);
+// Low:
+// - Show details of country in another panel while hovering / on click?
+// - Fade map in
+// - Download data sets and save to local storage for quicker subsequent loads on same day
+
+// Done:
+// - Toggle between confirmed cases and deaths
 
 // const gradient = ['#017a29', '#c7c214', '#c40707'];
 // const gradient = ['#447c46', '#5b995e', '#81c784', '#d0855c', '#c84646'];
@@ -45,6 +50,7 @@ export default {
     name: 'Home',
     components: {
         DataToggle,
+        DatePicker,
         Help,
         Loading,
         Map
@@ -53,7 +59,6 @@ export default {
         return {
             loading: true,
             dataType: 'cases',
-            dateRange: [0, 100],
             countries: null
         };
     },
@@ -107,6 +112,7 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 2em;
 }
 
 .map {
