@@ -10,11 +10,14 @@
   "dependencies": {
     "@amcharts/amcharts4": "^4.9.13",
     "@amcharts/amcharts4-geodata": "^4.1.14",
+    "@syncfusion/ej2-vue-inputs": "^18.1.43",
     "color-interpolate": "^1.0.5",
     "core-js": "^3.6.4",
     "data-forge": "^1.8.4",
     "date-fns": "^2.12.0",
     "least-squares": "^0.0.2",
+    "sass": "^1.26.3",
+    "sass-loader": "^8.0.2",
     "vue": "^2.6.11",
     "vue-router": "^3.1.6"
   },
