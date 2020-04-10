@@ -6,7 +6,9 @@
             <DataToggle :data-type="dataType" @click.native="changeDataType()" />
         </div>
         <Map class="map" :countries="countries" />
-        <ejs-slider id="range" min="1" max="20" v-model="dateRange" type="Range"></ejs-slider>
+        <!-- <div>
+            <ejs-slider class="range" :value="10" min="1" max="20" v-model="dateRange" type="Range"></ejs-slider>
+        </div> -->
     </div>
 </template>
 
@@ -37,7 +39,7 @@ Vue.use(SliderPlugin);
 // const gradient = ['#006837', '#1A9850', '#66BD63', '#D73027', '#A50026'];
 
 const goodGradient = ['#4CAF50', '#C8E6C9'];
-const badGradient = ['#FFECB3', '#EF6C00'];
+const badGradient = ['#FFECB3', '#EF5350'];
 
 export default {
     name: 'Home',
@@ -51,7 +53,7 @@ export default {
         return {
             loading: true,
             dataType: 'cases',
-            dateRange: null,
+            dateRange: [0, 100],
             countries: null
         };
     },
@@ -74,8 +76,8 @@ export default {
 
             const data = await loadData(this.dataType, this.periodLength);
 
-            const max = 8;
-            const min = -8;
+            const max = 1;
+            const min = -1;
 
             const goodColormap = interpolate(goodGradient);
             const badColormap = interpolate(badGradient);
@@ -109,6 +111,10 @@ export default {
 
 .map {
     flex: 1;
+}
+
+.range {
+    height: 50px;
 }
 
 .options {

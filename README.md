@@ -1,4 +1,4 @@
-# beat-it
+# Are We Winning?
 
 ## Project setup
 ```
