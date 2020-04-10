@@ -9,7 +9,8 @@ import worldLow from '@amcharts/amcharts4-geodata/worldLow';
 
 export default {
     props: {
-        countries: { type: Array, required: true }
+        countries: { type: Array, required: true },
+        allowZoom: { type: Boolean, default: true }
     },
     data () {
         return {
@@ -20,19 +21,19 @@ export default {
         this.map = create('mapContainer', MapChart);
 
         this.map.geodata = worldLow;
-        this.map.seriesContainer.draggable = false;
-        this.map.seriesContainer.resizable = false;
-        this.map.maxZoomLevel = 1;
+
+        if (!this.allowZoom) {
+            this.map.seriesContainer.draggable = false;
+            this.map.seriesContainer.resizable = false;
+            this.map.maxZoomLevel = 1;
+        }
+
         this.map.seriesContainer.events.disableType('doublehit');
         this.map.chartContainer.background.events.disableType('doublehit');
 
         const series = new MapPolygonSeries();
 
-        series.data = this.countries.map(c => ({
-            id: c.id,
-            gradient: c.gradient,
-            fill: c.gradient < 1 ? color('#32a846') : color('#a84432')
-        }));
+        series.data = this.countries;
 
         series.mapPolygons.template.tooltipText = '{name} {gradient}';
         series.mapPolygons.template.fill = color('#aaaaaa');

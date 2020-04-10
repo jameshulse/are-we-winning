@@ -12,8 +12,11 @@
 // - Show world map in gradient from red -> green
 // - Names : "us vs covid" "beat it"
 
+import * as interpolate from 'color-interpolate';
 import { loadData } from '@/lib/data';
 import Map from '@/components/Map';
+
+const gradient = ['#017a29', '#c7c214', '#c40707'];
 
 export default {
     name: 'Home',
@@ -23,11 +26,23 @@ export default {
     data () {
         return {
             loading: true,
-            country: 'United Kingdom'
+            countries: null
         };
     },
     async created () {
-        this.countries = await loadData();
+        const data = await loadData();
+
+        const max = 5;
+        const min = -5;
+
+        const colormap = interpolate(gradient);
+        const normalize = x => (Math.max(Math.min(x, max), min) + Math.abs(min)) / (Math.abs(max) + Math.abs(min));
+
+        this.countries = data.map(c => ({
+            id: c.id,
+            gradient: normalize(c.gradient),
+            fill: colormap(normalize(c.gradient))
+        }));
 
         this.loading = false;
     },
