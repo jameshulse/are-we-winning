@@ -50,16 +50,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-
-#mapContainer {
-    width: 100%;
-    height: 100%;
-}
-
-/* .amtooltip {
-    font-size: 30px;
-} */
-
-</style>

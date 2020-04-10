@@ -4,6 +4,7 @@ import LeastSquares from 'least-squares';
 import countryLookup from './countryLookup';
 
 const dataUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
+// const dataUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
 
 export async function loadData (period = 7) {
     const response = await fetch(dataUrl);
