@@ -4,13 +4,7 @@ import countryLookup from './countryLookup';
 
 const dataUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
 
-function getStatus (df, country, period = 14) {
-    const countryData = df.where(row => row['Country/Region'] === country && row['Province/State'] === '');
-
-    if (countryData.count() > 1) {
-        throw new Error('Can\t analyse with more than one Country row');
-    }
-
+function getGradient (countryData, period) {
     const recentDayColumns = countryData.getColumnNames().slice(-(period + 1)); // Take one extra day to calculate new cases
 
     const confirmedCases = countryData.subset(recentDayColumns).toRows()[0].map(d => +d);
@@ -23,26 +17,45 @@ function getStatus (df, country, period = 14) {
 
     LeastSquares(x, y, params);
 
-    console.log(params);
-
-    return params.m < 1 ? 'winning' : 'losing';
+    return params.m;
 }
 
-export async function load () {
-        const response = await fetch(dataUrl);
-        const data = await response.text();
+export async function loadData (period = 7) {
+    const response = await fetch(dataUrl);
+    const data = await response.text();
 
-        df = fromCSV(data).setIndex('Country/Region');
+    const df = fromCSV(data).setIndex('Country/Region');
 
-        const countries = df.select(r => r['Country/Region']).distinct().toArray();
-        const result = [];
+    const countries = df.select(r => r['Country/Region']).distinct().toArray();
+    const result = [];
 
-        for (var i = 0; i < countries.length; i++) {
-            const countryName = countries[i];
-            const countryId = countryLookup[countryName];
+    for (var i = 0; i < countries.length; i++) {
+        const countryName = countries[i];
+        const countryId = countryLookup[countryName];
 
-            if (!countryId) {
-                continue;
-            }
+        if (!countryId) {
+            continue;
         }
+
+        const countryData = df.where(row => row['Country/Region'] === countryName && row['Province/State'] === '');
+
+        if (countryData.count() === 0) {
+            console.log('Country data not found:', countryName);
+            continue;
+        } else if (countryData.count() > 1) {
+            console.log('Too many data points for county: ', countryName);
+            continue;
+        }
+
+        const gradient = getGradient(countryData, period);
+
+        if (isNaN(gradient)) {
+            console.log('Gradient invalid for: ', countryName);
+            continue;
+        }
+
+        result.push({ id: countryId, gradient });
+    }
+
+    return result;
 }

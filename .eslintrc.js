@@ -8,6 +8,7 @@ module.exports = {
         parser: "babel-eslint"
     },
     rules: {
+        "quote-props": ["warn", "consistent"],
         "indent": ["error", 4],
         "semi": ["error", "always"],
         "comma-dangle": ["warn", "only-multiline"],

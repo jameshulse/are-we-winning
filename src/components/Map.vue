@@ -28,8 +28,15 @@ export default {
 
         const series = new MapPolygonSeries();
 
-        series.mapPolygons.template.tooltipText = '{name}';
-        series.mapPolygons.template.fill = color('#74B266');
+        series.data = this.countries.map(c => ({
+            id: c.id,
+            gradient: c.gradient,
+            fill: c.gradient < 1 ? color('#32a846') : color('#a84432')
+        }));
+
+        series.mapPolygons.template.tooltipText = '{name} {gradient}';
+        series.mapPolygons.template.fill = color('#aaaaaa');
+        series.mapPolygons.template.propertyFields.fill = 'fill';
         series.exclude = ['AQ'];
 
         // const hover = series.mapPolygons.template.states.create('hover');

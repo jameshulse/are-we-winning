@@ -12,7 +12,7 @@
 // - Show world map in gradient from red -> green
 // - Names : "us vs covid" "beat it"
 
-import data from '@/lib/data';
+import { loadData } from '@/lib/data';
 import Map from '@/components/Map';
 
 export default {
@@ -27,7 +27,7 @@ export default {
         };
     },
     async created () {
-        this.countries = await data.load();
+        this.countries = await loadData();
 
         this.loading = false;
     },
@@ -37,6 +37,7 @@ export default {
 <style>
 
 .container {
+    box-sizing: border-box;
     padding: 3em;
     height: 100%;
 }
