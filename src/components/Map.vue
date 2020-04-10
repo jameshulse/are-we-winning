@@ -4,7 +4,7 @@
 
 <script>
 import { create, color } from '@amcharts/amcharts4/core';
-import { MapChart, MapPolygonSeries } from '@amcharts/amcharts4/maps';
+import { MapChart, MapPolygonSeries, projections } from '@amcharts/amcharts4/maps';
 import worldLow from '@amcharts/amcharts4-geodata/worldLow';
 
 export default {
@@ -21,6 +21,7 @@ export default {
         this.map = create('mapContainer', MapChart);
 
         this.map.geodata = worldLow;
+        this.map.projection = new projections.Miller();
 
         if (!this.allowZoom) {
             this.map.seriesContainer.draggable = false;
