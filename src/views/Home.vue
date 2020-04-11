@@ -26,6 +26,7 @@ import DatePicker from '@/components/DatePicker';
 // High:
 // - Confirm calculation is correct / useful
 // - Get data working for grey countries
+// - Fix Hong Kong etc like in other versions
 // - Date range slider to pick dates for calculation
 // - Finalise colour scheme!
 // - Improve map tooltips
@@ -33,7 +34,9 @@ import DatePicker from '@/components/DatePicker';
 // Low:
 // - Show details of country in another panel while hovering / on click?
 // - Fade map in
+// - Zoom to geo coords
 // - Download data sets and save to local storage for quicker subsequent loads on same day
+// - Get data per US state
 
 // Done:
 // - Toggle between confirmed cases and deaths
