@@ -10,21 +10,14 @@ import worldLow from '@amcharts/amcharts4-geodata/worldLow';
 export default {
     props: {
         countries: { type: Array, required: true },
-        allowZoom: { type: Boolean, default: true }
+        allowZoom: { type: Boolean, default: true },
+        center: { type: Object, default: null },
     },
     data () {
         return {
             map: null
         };
     },
-    // watch: {
-    //     countries: {
-    //         handler () {
-    //             this.updateData();
-    //         },
-    //         immediate: false
-    //     }
-    // },
     mounted () {
         this.map = create('mapContainer', MapChart);
 
@@ -46,6 +39,11 @@ export default {
         series.mapPolygons.template.fill = color('#aaaaaa');
         series.exclude = ['AQ'];
         series.useGeodata = true;
+
+        if (this.center) {
+            this.map.homeGeoPoint = this.center;
+            this.map.homeZoomLevel = 1.5;
+        }
 
         this.map.series.push(series);
 

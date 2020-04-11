@@ -10,7 +10,7 @@
 
         <template v-else>
             <!-- <keep-alive> -->
-                <Map class="map" :countries="countries" />
+                <Map class="map" :countries="countries" :center="location" />
             <!-- </keep-alive> -->
 
             <DatePicker
@@ -76,10 +76,12 @@ export default {
             minimumDate: null,
             maximumDate: null,
             dateRange: null,
+            location: null,
             slowLoad: debounce(this.loadData, 1000)
         };
     },
     async created () {
+        await this.getIpLocation();
         await this.loadData();
     },
     computed: {
@@ -127,6 +129,15 @@ export default {
             }));
 
             this.loading = false;
+        },
+        async getIpLocation () {
+            const response = await fetch('https://ipapi.co/json');
+            const data = await response.json();
+
+            this.location = {
+                latitude: data.latitude,
+                longitude: data.longitude
+            };
         },
         saveDateRange (lastDate) {
             this.maximumDate = lastDate;
