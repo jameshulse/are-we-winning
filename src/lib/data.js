@@ -103,7 +103,11 @@ export async function getCountryRates (dataType, dateRange, scale = 'linear') {
             continue;
         }
 
-        result.push({ id: countryId, gradient });
+        result.push({
+            id: countryId,
+            angle: Math.atan(gradient) / (Math.PI / 2),
+            gradient,
+        });
     }
 
     return { result, lastDate };

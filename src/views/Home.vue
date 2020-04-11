@@ -122,7 +122,7 @@ export default {
 
             this.countries = result.map(c => ({
                 id: c.id,
-                gradient: c.gradient,
+                value: c.angle,
                 fill: c.gradient === 0
                     ? '#C8E6C9'
                     : (c.gradient < 0 ? goodColormap(normalize(c.gradient)) : badColormap(normalize(c.gradient)))

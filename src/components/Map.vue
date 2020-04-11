@@ -53,7 +53,7 @@ export default {
         updateData () {
             const series = new MapPolygonSeries();
 
-            series.mapPolygons.template.tooltipText = '{name} {gradient}';
+            series.mapPolygons.template.tooltipText = '{name} {value}';
             // series.mapPolygons.template.tooltipText = '{name}';
             series.tooltip.background.filters.clear();
             series.tooltip.getFillFromObject = false;
