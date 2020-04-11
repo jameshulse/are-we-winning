@@ -6,15 +6,24 @@
         </div>
 
         <Loading v-if="loading" />
-        <Map v-else class="map" :countries="countries" />
 
-        <!-- <DatePicker v-model="dateRange" /> -->
+        <template v-else>
+            <Map class="map" :countries="countries" />
+
+            <DatePicker
+                v-model="dateRange"
+                :min-date="minimumDate"
+                :max-date="maximumDate"
+            />
+        </template>
     </div>
 </template>
 
 <script>
 import * as interpolate from 'color-interpolate';
-import { loadData } from '@/lib/data';
+import { addDays } from 'date-fns';
+import { getCountryRates } from '@/lib/data';
+import { debounce } from '@/lib/utils';
 import Help from '@/components/Help';
 import DataToggle from '@/components/DataToggle';
 import Map from '@/components/Map';
@@ -25,18 +34,19 @@ import DatePicker from '@/components/DatePicker';
 
 // High:
 // - Confirm calculation is correct / useful
-// - Get data working for grey countries
 // - Fix Hong Kong etc like in other versions
 // - Date range slider to pick dates for calculation
 // - Finalise colour scheme!
 // - Improve map tooltips
 
 // Low:
+// - Get data working for remaining grey countries
 // - Show details of country in another panel while hovering / on click?
 // - Fade map in
 // - Zoom to geo coords
-// - Download data sets and save to local storage for quicker subsequent loads on same day
+// - Local storage of data type toggle
 // - Get data per US state
+// - Determine 'end date' of data once loaded
 
 // Done:
 // - Toggle between confirmed cases and deaths
@@ -62,7 +72,11 @@ export default {
         return {
             loading: true,
             dataType: 'cases',
-            countries: null
+            countries: null,
+            minimumDate: null,
+            maximumDate: null,
+            dateRange: null,
+            slowLoad: debounce(this.loadData, 500)
         };
     },
     async created () {
@@ -76,13 +90,24 @@ export default {
     watch: {
         dataType () {
             this.loadData();
+        },
+        dateRange (newValue, oldValue) {
+            if (oldValue === null) {
+                return;
+            }
+
+            this.slowLoad();
         }
     },
     methods: {
         async loadData () {
             this.loading = true;
 
-            const data = await loadData(this.dataType, this.periodLength);
+            const { result, lastDate } = await getCountryRates(this.dataType, this.dateRange);
+
+            if (!this.dateRange) {
+                this.adjustDateRange(lastDate);
+            }
 
             const max = 1;
             const min = -1;
@@ -91,7 +116,7 @@ export default {
             const badColormap = interpolate(badGradient);
             const normalize = x => (Math.max(Math.min(x, max), min) + Math.abs(min)) / (Math.abs(max) + Math.abs(min));
 
-            this.countries = data.map(c => ({
+            this.countries = result.map(c => ({
                 id: c.id,
                 gradient: c.gradient,
                 fill: c.gradient === 0
@@ -100,6 +125,11 @@ export default {
             }));
 
             this.loading = false;
+        },
+        adjustDateRange (lastDate) {
+            this.maximumDate = lastDate;
+            this.minimumDate = addDays(lastDate, -30);
+            this.dateRange = [addDays(lastDate, -7), lastDate];
         },
         changeDataType () {
             this.dataType = this.dataType === 'cases' ? 'deaths' : 'cases';

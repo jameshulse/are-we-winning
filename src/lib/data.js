@@ -3,17 +3,63 @@ import { parse, format, addDays } from 'date-fns';
 import LeastSquares from 'least-squares';
 import countryLookup from './countryLookup';
 
-const casesUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv';
-const deathsUrl = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv';
+const dataUrls = {
+    'cases': 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv',
+    'death': 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
+};
 
-export async function loadData (dataType, period = 7) {
-    const response = await fetch(dataType === 'cases' ? casesUrl : deathsUrl);
+const dataCache = {};
+
+async function loadData (dataType) {
+    if (dataCache[dataType]) {
+        return dataCache[dataType];
+    }
+
+    const response = await fetch(dataUrls[dataType]);
     const data = await response.text();
 
-    const dfAll = fromCSV(data);
+    dataCache[dataType] = fromCSV(data);
+
+    return dataCache[dataType];
+}
+
+function findGradient (xSeries, ySeries) {
+    const params = {};
+
+    LeastSquares(xSeries, ySeries, params);
+
+    return params.m;
+}
+
+function generateDates (fromDate, toDate) {
+    const dates = [];
+    let currentDate = fromDate;
+
+    while (currentDate <= toDate) {
+        dates.push(format(currentDate, 'M/d/yy'));
+
+        currentDate = addDays(currentDate, 1);
+    }
+
+    return dates;
+}
+
+export async function getCountryRates (dataType, dateRange) {
+    const dfAll = await loadData(dataType);
 
     const lastDate = parse(dfAll.getColumnNames().slice(-1).pop(), 'M/d/yy', new Date());
-    const dates = Array.from({ length: period + 1 }, (_, i) => format(addDays(lastDate, -period + i), 'M/d/yy'));
+
+    let fromDate;
+    let toDate;
+
+    if (dateRange) {
+        [fromDate, toDate] = dateRange;
+    } else {
+        toDate = lastDate;
+        fromDate = addDays(lastDate, -7);
+    }
+
+    const dates = generateDates(fromDate, toDate);
     const summarizer = dates.reduce((result, next) => ({ ...result, [next]: Series.sum }), {});
 
     const dfPeriod = dfAll.subset(['Country/Region', ...dates]);
@@ -36,11 +82,7 @@ export async function loadData (dataType, period = 7) {
         const x = confirmedCases.slice(1).map(n => Math.log10(n)); // Drop extra day and apply logarithmic
         const y = newCases.map(n => Math.log10(n === 0 ? 1 : n));
 
-        const params = {};
-
-        LeastSquares(x, y, params);
-
-        const gradient = params.m;
+        const gradient = findGradient(x, y);
 
         if (isNaN(gradient)) {
             console.log('Gradient invalid for: ', countryName);
@@ -50,5 +92,5 @@ export async function loadData (dataType, period = 7) {
         result.push({ id: countryId, gradient });
     }
 
-    return result;
+    return { result, lastDate };
 }

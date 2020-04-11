@@ -1,18 +1,21 @@
 <template>
     <div>
         <ejs-slider
-            min="1"
+            v-model="dateRange"
+            type="Range"
+            :min="minValue"
+            :max="maxValue"
             :tooltip="tooltip"
-            @rendering-ticks="onRenderingTicks"
-            @tooltip-change="onTooltipChange"
+            :step="stepSize"
             :change="onChange"
-            max="20" v-model="dateRange" type="Range"></ejs-slider>
+            @tooltipChange="onTooltipChange"
+        />
     </div>
 </template>
 
 <script>
 import Vue from 'vue';
-import { addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { SliderPlugin } from '@syncfusion/ej2-vue-inputs';
 
 Vue.use(SliderPlugin);
@@ -20,39 +23,38 @@ Vue.use(SliderPlugin);
 export default {
     props: {
         value: { type: Array, required: true },
+        minDate: { type: Date, required: true },
+        maxDate: { type: Date, required: true },
     },
     data () {
         return {
-            minVal: addDays(new Date(), -30).getTime(),
-            maxVal: new Date().getTime(),
             stepSize: 86400000,
-            dateRange: this.value,
+            dateRange: [this.value[0].getTime(), this.value[1].getTime()],
             tooltip: { placement: 'Before', isVisible: true },
-            ticks: { placement: 'After', largeStep: 2 * 86400000 }
         };
+    },
+    computed: {
+        minValue () {
+            return this.minDate.getTime();
+        },
+        maxValue () {
+            return this.maxDate.getTime();
+        }
     },
     methods: {
         onChange (args) {
-            this.$emit('value', this.dateRange);
+            const [from, to] = this.dateRange;
+
+            this.$emit('input', [new Date(from), new Date(to)]);
         },
         onTooltipChange (args) {
-            const totalMiliSeconds = Number(args.text);
+            const [fromMillis, toMillis] = args.value;
 
-            // Convert the current milliseconds to the respective date in desired format
-            const custom = { year: 'numeric', month: 'short', day: 'numeric' };
-            args.text = new Date(totalMiliSeconds).toLocaleDateString(
-                'en-us',
-                custom
-            );
+            const from = format(fromMillis, 'd/M/yy');
+            const to = format(toMillis, 'd/M/yy');
+
+            args.text = `${from} - ${to}`;
         },
-        onRenderingTicks (args) {
-            const totalMiliSeconds = Number(args.value);
-
-            // Convert the current milliseconds to the respective date in desired format
-            const custom = { year: 'numeric', month: 'short', day: 'numeric' };
-
-            args.text = new Date(totalMiliSeconds).toLocaleDateString('en-us', custom);
-        }
     }
 };
 </script>
