@@ -18,9 +18,19 @@ async function loadData (dataType) {
     const response = await fetch(dataUrls[dataType]);
     const data = await response.text();
 
-    dataCache[dataType] = fromCSV(data);
+    let df = fromCSV(data, { dynamicTyping: true });
 
-    // TODO: Move Hong Kong from region to country
+    df = df.generateSeries({
+        'country': r => {
+            if (r['Province/State'] === 'Hong Kong') {
+                return 'Hong Kong';
+            } else {
+                return r['Country/Region'];
+            }
+        }
+    });
+
+    dataCache[dataType] = df;
 
     return dataCache[dataType];
 }
@@ -46,10 +56,10 @@ function generateDates (fromDate, toDate) {
     return dates;
 }
 
-export async function getCountryRates (dataType, dateRange) {
+export async function getCountryRates (dataType, dateRange, scale = 'linear') {
     const dfAll = await loadData(dataType);
 
-    const lastDate = parse(dfAll.getColumnNames().slice(-1).pop(), 'M/d/yy', new Date());
+    const lastDate = parse(dfAll.getColumnNames().slice(-2, -1).pop(), 'M/d/yy', new Date());
 
     let fromDate;
     let toDate;
@@ -64,25 +74,27 @@ export async function getCountryRates (dataType, dateRange) {
     const dates = generateDates(fromDate, toDate);
     const summarizer = dates.reduce((result, next) => ({ ...result, [next]: Series.sum }), {});
 
-    const dfPeriod = dfAll.subset(['Country/Region', ...dates]);
+    const dfPeriod = dfAll.subset(['country', ...dates]);
 
     const result = [];
 
-    for (const dfCountry of dfPeriod.groupBy(r => r['Country/Region'])) {
-        const countryName = dfCountry.first()['Country/Region'];
+    for (const dfCountry of dfPeriod.groupBy(r => r['country'])) {
+        const countryName = dfCountry.first()['country'];
         const countryId = countryLookup[countryName];
 
         if (!countryId) {
             continue;
         }
 
-        const countryData = dfCountry.dropSeries('Country/Region').summarize(summarizer);
+        const countryData = dfCountry.dropSeries('country').summarize(summarizer);
 
         const confirmedCases = Object.values(countryData).map(d => +d);
         const newCases = confirmedCases.reduce((result, next) => [...result, result.length ? next - confirmedCases[result.length - 1] : 0], []).slice(1);
 
-        const x = confirmedCases.slice(1).map(n => Math.log10(n)); // Drop extra day and apply logarithmic
-        const y = newCases.map(n => Math.log10(n === 0 ? 1 : n));
+        const seriesTransform = n => scale === 'logarithmic' ? Math.log10(n === 0 ? 1 : n) : n;
+
+        const x = confirmedCases.slice(1).map(seriesTransform);
+        const y = newCases.map(seriesTransform);
 
         const gradient = findGradient(x, y);
 

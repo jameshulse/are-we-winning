@@ -17,14 +17,14 @@ export default {
             map: null
         };
     },
-    watch: {
-        countries: {
-            handler () {
-                this.updateData();
-            },
-            immediate: false
-        }
-    },
+    // watch: {
+    //     countries: {
+    //         handler () {
+    //             this.updateData();
+    //         },
+    //         immediate: false
+    //     }
+    // },
     mounted () {
         this.map = create('mapContainer', MapChart);
 
@@ -56,6 +56,11 @@ export default {
             const series = new MapPolygonSeries();
 
             series.mapPolygons.template.tooltipText = '{name} {gradient}';
+            // series.mapPolygons.template.tooltipText = '{name}';
+            series.tooltip.background.filters.clear();
+            series.tooltip.getFillFromObject = false;
+            series.tooltip.background.fill = color('#aaa');
+
             series.mapPolygons.template.fill = color('#aaaaaa');
             series.mapPolygons.template.propertyFields.fill = 'fill';
             series.exclude = ['AQ'];

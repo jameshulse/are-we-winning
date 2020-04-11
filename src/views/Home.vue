@@ -9,9 +9,9 @@
         <Loading v-if="loading" />
 
         <template v-else>
-            <keep-alive>
+            <!-- <keep-alive> -->
                 <Map class="map" :countries="countries" />
-            </keep-alive>
+            <!-- </keep-alive> -->
 
             <DatePicker
                 v-model="dateRange"
@@ -105,7 +105,7 @@ export default {
         async loadData () {
             this.loading = true;
 
-            const { result, lastDate } = await getCountryRates(this.dataType, this.dateRange);
+            const { result, lastDate } = await getCountryRates(this.dataType, this.dateRange, 'logarithmic');
 
             if (!this.dateRange) {
                 this.saveDateRange(lastDate);
@@ -144,7 +144,7 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 2em;
+    padding: 3.5em;
 }
 
 .map {
@@ -158,6 +158,7 @@ export default {
 .options {
     z-index: 1;
     position: absolute;
+    background: #fafafa;
     left: 10px;
     top: 10px;
     display: flex;
