@@ -17,6 +17,14 @@ export default {
             map: null
         };
     },
+    watch: {
+        countries: {
+            handler () {
+                this.updateData();
+            },
+            immediate: false
+        }
+    },
     mounted () {
         this.map = create('mapContainer', MapChart);
 
@@ -32,21 +40,41 @@ export default {
         this.map.seriesContainer.events.disableType('doublehit');
         this.map.chartContainer.background.events.disableType('doublehit');
 
+        // Background series
         const series = new MapPolygonSeries();
 
-        series.data = this.countries;
-
-        series.mapPolygons.template.tooltipText = '{name} {gradient}';
         series.mapPolygons.template.fill = color('#aaaaaa');
-        series.mapPolygons.template.propertyFields.fill = 'fill';
         series.exclude = ['AQ'];
-        // series.slices.template.getFillFromObject = false;
-
-        // const hover = series.mapPolygons.template.states.create('hover');
-
         series.useGeodata = true;
 
         this.map.series.push(series);
+
+        this.updateData();
+    },
+    methods: {
+        updateData () {
+            const series = new MapPolygonSeries();
+
+            series.mapPolygons.template.tooltipText = '{name} {gradient}';
+            series.mapPolygons.template.fill = color('#aaaaaa');
+            series.mapPolygons.template.propertyFields.fill = 'fill';
+            series.exclude = ['AQ'];
+            series.useGeodata = true;
+
+            series.data = this.countries;
+
+            // series.slices.template.getFillFromObject = false;
+            // const hover = series.mapPolygons.template.states.create('hover');
+
+            if (this.map.series.length > 1) {
+                this.map.series.removeIndex(1).dispose();
+            }
+
+            this.map.series.push(series);
+        }
+    },
+    destroyed () {
+        this.map.dispose();
     }
 };
 </script>

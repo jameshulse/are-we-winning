@@ -20,6 +20,8 @@ async function loadData (dataType) {
 
     dataCache[dataType] = fromCSV(data);
 
+    // TODO: Move Hong Kong from region to country
+
     return dataCache[dataType];
 }
 

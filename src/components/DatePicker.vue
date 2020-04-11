@@ -30,7 +30,7 @@ export default {
         return {
             stepSize: 86400000,
             dateRange: [this.value[0].getTime(), this.value[1].getTime()],
-            tooltip: { placement: 'Before', isVisible: true },
+            tooltip: { placement: 'Before', isVisible: true, showOn: 'Hover' },
         };
     },
     computed: {
